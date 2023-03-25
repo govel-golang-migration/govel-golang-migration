@@ -23,5 +23,5 @@ func Install(mysqlDsn string) {
 	}
 
 	db.Migrator().CreateTable(&Migration{})
-	fmt.Print("Migration table created")
+	fmt.Println("Migration table created")
 }
