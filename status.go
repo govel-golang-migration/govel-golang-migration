@@ -30,13 +30,7 @@ func Status(mysqlDsn string) {
 		return
 	}
 
-	var results []Migration
-	var migrateNameHash = make(map[string]int)
-	db.Find(&results)
-	for _, result := range results {
-		migrateNameHash[result.Name] = result.Batch
-	}
-
+	migrateNameHash, _ := buildMigrateNameHash(db)
 	err = filepath.Walk(migratePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -65,4 +59,17 @@ func errorMessage(message string) string {
 
 func successMessage(message string) string {
 	return "\033[32m" + message + "\033[0m"
+}
+
+func buildMigrateNameHash(db *gorm.DB) (map[string]int, error) {
+	var results []Migration
+	var migrateNameHash = make(map[string]int)
+	err := db.Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, result := range results {
+		migrateNameHash[result.Name] = result.Batch
+	}
+	return migrateNameHash, nil
 }
