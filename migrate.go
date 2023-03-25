@@ -46,6 +46,7 @@ func Migrate(mysqlDsn string) {
 		panic(err)
 	}
 
+	migrateNameHash, _ := buildMigrateNameHash(db)
 	err = filepath.Walk(migrationPath, func(migrationPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -55,6 +56,11 @@ func Migrate(mysqlDsn string) {
 		match := r.FindStringSubmatch(info.Name())
 
 		if len(match) > 1 {
+			_, ok := migrateNameHash[info.Name()]
+			if ok {
+				return nil
+			}
+
 			println(info.Name())
 			fmt.Println(match[1])
 			fmt.Println(toCamelCase(match[1]))
@@ -66,6 +72,9 @@ func Migrate(mysqlDsn string) {
 			}
 
 			runLib.(func())()
+
+			migration := Migration{Name: info.Name(), Batch: number}
+			_ = db.Create(&migration)
 		}
 
 		return nil
