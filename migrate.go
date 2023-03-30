@@ -52,7 +52,7 @@ func Migrate(mysqlDsn string) {
 			return err
 		}
 
-		r := regexp.MustCompile(`^\d+_(.+)\.go$`)
+		r := regexp.MustCompile(`^(\d{4}_\d{2}_\d{2}_\d{6})_(.+)\.go$`)
 		match := r.FindStringSubmatch(info.Name())
 
 		if len(match) > 1 {
@@ -62,10 +62,10 @@ func Migrate(mysqlDsn string) {
 			}
 
 			println(info.Name())
-			fmt.Println(match[1])
-			fmt.Println(toCamelCase(match[1]))
+			fmt.Println(match[2])
+			fmt.Println(toCamelCase(match[2]))
 
-			functionName := "Up" + toCamelCase(match[1])
+			functionName := "Up" + toCamelCase(match[2])
 			runLib, err := plug.Lookup(functionName)
 			if err != nil {
 				panic(err)
