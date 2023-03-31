@@ -53,6 +53,10 @@ func Status(mysqlDsn string) {
 	}
 }
 
+func infoMessage(message string) string {
+	return "\033[34m" + message + "\033[0m"
+}
+
 func errorMessage(message string) string {
 	return "\033[31m" + message + "\033[0m"
 }
@@ -72,4 +76,21 @@ func buildMigrateNameHash(db *gorm.DB) (map[string]int, error) {
 		migrateNameHash[result.Name] = result.Batch
 	}
 	return migrateNameHash, nil
+}
+
+func getMigrateFolder() string {
+	cwd, err := os.Getwd()
+	
+	if err != nil {
+		panic(err)
+	}
+
+	migratePath := path.Join(cwd, "migrations")
+	if _, err := os.Stat(migratePath); os.IsNotExist(err) {
+		fmt.Println(errorMessage("migration folder does not exist: " + migratePath))
+		
+		panic("migration folder does not exist: " + migratePath)
+	}
+
+	return migratePath
 }
