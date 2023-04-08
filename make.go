@@ -2,9 +2,10 @@ package govel_migration
 
 import (
 	"fmt"
-	"strings"
 	"os"
 	"path"
+	"runtime"
+	"strings"
 	"time"
 )
 
@@ -27,13 +28,13 @@ func Make(fileName string) {
 
 	filePath := path.Join(migrationPath, prefix + "_" + fileName + ".go")
 	file, err := os.Create(filePath)
-	
+
 	if err != nil {
 		fmt.Println("migration file generate fail: " + filePath)
 		return
 	}
-	
-	content := loadStub(path.Join(cwd, "migration.stub"))
+
+	content := loadStub(path.Join(getPackageDir(), "migration.stub"))
 	content = strings.Replace(content, "{UpFunctionName}", "Up" + toCamelCase(fileName), -1)
 	content = strings.Replace(content, "{DownFunctionName}", "Down" + toCamelCase(fileName), -1)
 
@@ -46,4 +47,14 @@ func loadStub(fileName string) string {
 	content, _ := os.ReadFile(fileName)
 
 	return string(content)
+}
+
+func getPackageDir() string {
+	_, file, _, ok := runtime.Caller(0)
+
+	if !ok {
+		panic("failed to get file path")
+	}
+
+	return path.Dir(file)
 }
