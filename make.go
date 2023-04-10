@@ -18,15 +18,14 @@ func Make(fileName string) {
 
 	migrationPath := path.Join(cwd, "migrations")
 
-	if _, err := os.Stat(migrationPath); os.IsNotExist(err) {
-		fmt.Println("migration folder does not exist: " + migrationPath)
-		return
+	if err := os.MkdirAll(migrationPath, os.ModePerm); err != nil {
+		panic(err)
 	}
 
 	location, _ := time.LoadLocation("Asia/Taipei")
 	prefix := time.Now().In(location).Format("2006_01_02_150405")
 
-	filePath := path.Join(migrationPath, prefix + "_" + fileName + ".go")
+	filePath := path.Join(migrationPath, prefix+"_"+fileName+".go")
 	file, err := os.Create(filePath)
 
 	if err != nil {
@@ -35,8 +34,8 @@ func Make(fileName string) {
 	}
 
 	content := loadStub(path.Join(getPackageDir(), "migration.stub"))
-	content = strings.Replace(content, "{UpFunctionName}", "Up" + toCamelCase(fileName), -1)
-	content = strings.Replace(content, "{DownFunctionName}", "Down" + toCamelCase(fileName), -1)
+	content = strings.Replace(content, "{UpFunctionName}", "Up"+toCamelCase(fileName), -1)
+	content = strings.Replace(content, "{DownFunctionName}", "Down"+toCamelCase(fileName), -1)
 
 	file.WriteString(content)
 
