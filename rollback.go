@@ -49,6 +49,8 @@ func Rollback(stage int, mysqlDsn string) {
 		}
 
 		runLib.(func())()
+
+		db.Unscoped().Delete(&migration)
 	}
 
 	println(successMessage("rollback success"))
