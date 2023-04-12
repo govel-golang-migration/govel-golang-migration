@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func Migrate(mysqlDsn string) {
+func Migrate(mysqlDsn string, migrationPath string) {
 	db, err := gorm.Open(mysql.Open(mysqlDsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -22,32 +22,31 @@ func Migrate(mysqlDsn string) {
 	number := getMigrateNumber(db)
 	println(number)
 
-	cwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 
-	migrationPath := path.Join(cwd, "migrations")
-	if _, err := os.Stat(migrationPath); os.IsNotExist(err) {
-		fmt.Println("migration folder does not exist: " + migrationPath)
+	absMigrationPath := path.Join(migrationPath, "migrations")
+	if _, err := os.Stat(absMigrationPath); os.IsNotExist(err) {
+		fmt.Println("migration folder does not exist: " + absMigrationPath)
 		return
 	}
 
 	cmd := exec.Command("go", "build", "-buildmode=plugin")
-	cmd.Dir = migrationPath
+	cmd.Dir = absMigrationPath
 	err = cmd.Run()
 	if err != nil {
 		panic("build error")
 	}
 
-	soPath := path.Join(migrationPath, "migrations.so")
+	soPath := path.Join(absMigrationPath, "migrations.so")
 	plug, err := plugin.Open(soPath)
 	if err != nil {
 		panic(err)
 	}
 
 	migrateNameHash, _ := buildMigrateNameHash(db)
-	err = filepath.Walk(migrationPath, func(migrationPath string, info os.FileInfo, err error) error {
+	err = filepath.Walk(absMigrationPath, func(absMigrationPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

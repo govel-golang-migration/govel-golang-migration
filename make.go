@@ -9,23 +9,17 @@ import (
 	"time"
 )
 
-func Make(fileName string) {
-	cwd, err := os.Getwd()
+func Make(fileName string, migrationPath string) {
+	absMigrationPath := getMigrateFolder(migrationPath)
 
-	if err != nil {
-		panic(err)
-	}
-
-	migrationPath := path.Join(cwd, "migrations")
-
-	if err := os.MkdirAll(migrationPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(absMigrationPath, os.ModePerm); err != nil {
 		panic(err)
 	}
 
 	location, _ := time.LoadLocation("Asia/Taipei")
 	prefix := time.Now().In(location).Format("2006_01_02_150405")
 
-	filePath := path.Join(migrationPath, prefix+"_"+fileName+".go")
+	filePath := path.Join(absMigrationPath, prefix+"_"+fileName+".go")
 	file, err := os.Create(filePath)
 
 	if err != nil {
