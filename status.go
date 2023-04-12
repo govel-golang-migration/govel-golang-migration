@@ -78,19 +78,7 @@ func buildMigrateNameHash(db *gorm.DB) (map[string]int, error) {
 	return migrateNameHash, nil
 }
 
-func getMigrateFolder() string {
-	cwd, err := os.Getwd()
-	
-	if err != nil {
-		panic(err)
-	}
-
-	migratePath := path.Join(cwd, "migrations")
-	if _, err := os.Stat(migratePath); os.IsNotExist(err) {
-		fmt.Println(errorMessage("migration folder does not exist: " + migratePath))
-		
-		panic("migration folder does not exist: " + migratePath)
-	}
-
-	return migratePath
+func getMigrateFolder(migrationPath string) string {
+	return path.Join(migrationPath, "migrations")
 }
+

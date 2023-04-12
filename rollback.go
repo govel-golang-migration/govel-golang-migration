@@ -10,25 +10,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func Rollback(stage int, mysqlDsn string) {
+func Rollback(stage int, mysqlDsn string, migrationPath string) {
 	db, err := gorm.Open(mysql.Open(mysqlDsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	folder := getMigrateFolder()
+	absMigrationPath := getMigrateFolder(migrationPath)
 
+	
 	cmd := exec.Command("go", "build", "-buildmode=plugin")
-	cmd.Dir = folder
-
+	cmd.Dir = absMigrationPath
+	
 	err = cmd.Run()
 	if err != nil {
 		panic("build error")
 	}
-
-	soPath := path.Join(folder, "migrations.so")
-
-	plug, err := plugin.Open(soPath)
+	
+	folder := path.Join(absMigrationPath, "migrations.so")
+	plug, err := plugin.Open(folder)
 
 	if err != nil {
 		panic(err)
