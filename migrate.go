@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func Migrate(mysqlDsn string, migrationPath string) {
+func Migrate(mysqlDsn string, migrationPath string, rebuild bool) {
 	db, err := gorm.Open(mysql.Open(mysqlDsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -32,11 +32,13 @@ func Migrate(mysqlDsn string, migrationPath string) {
 		return
 	}
 
-	cmd := exec.Command("go", "build", "-buildmode=plugin")
-	cmd.Dir = absMigrationPath
-	err = cmd.Run()
-	if err != nil {
-		panic("build error")
+	if (rebuild) {
+		cmd := exec.Command("go", "build", "-buildmode=plugin")
+		cmd.Dir = absMigrationPath
+		err = cmd.Run()
+		if err != nil {
+			panic("build error")
+		}
 	}
 
 	soPath := path.Join(absMigrationPath, "migrations.so")
