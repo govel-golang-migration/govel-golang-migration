@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func Status(mysqlDsn string) {
+func Status(mysqlDsn string, migrationPath string) {
 	db, err := gorm.Open(mysql.Open(mysqlDsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -19,19 +19,14 @@ func Status(mysqlDsn string) {
 		panic("Migration table does not exist, please using install command")
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	migratePath := path.Join(cwd, "migrations")
-	if _, err := os.Stat(migratePath); os.IsNotExist(err) {
-		fmt.Println("migration folder does not exist: " + migratePath)
+	absMigratePath := path.Join(migrationPath, "migrations")
+	if _, err := os.Stat(absMigratePath); os.IsNotExist(err) {
+		fmt.Println("migration folder does not exist: " + migrationPath)
 		return
 	}
 
 	migrateNameHash, _ := buildMigrateNameHash(db)
-	err = filepath.Walk(migratePath, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(absMigratePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
