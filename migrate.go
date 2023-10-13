@@ -72,7 +72,11 @@ func Migrate(mysqlDsn string, migrationPath string, rebuild bool) {
 				panic(err)
 			}
 
-			runLib.(func())()
+			migrateError := runLib.(func() error)()
+			if migrateError != nil {
+				fmt.Println("!!!migrate error, function name: " + functionName + "!!!")
+				panic(migrateError)
+			}
 
 			migration := Migration{Name: info.Name(), Batch: number}
 			_ = db.Create(&migration)

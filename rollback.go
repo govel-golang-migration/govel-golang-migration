@@ -2,12 +2,12 @@ package govel_migration
 
 import (
 	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"os/exec"
 	"path"
 	"plugin"
 	"regexp"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 func Rollback(stage int, mysqlDsn string, migrationPath string, rebuild bool) {
@@ -50,7 +50,11 @@ func Rollback(stage int, mysqlDsn string, migrationPath string, rebuild bool) {
 			panic(err)
 		}
 
-		runLib.(func())()
+		rollbackError := runLib.(func() error)()
+		if rollbackError != nil {
+			fmt.Println("!!!rollback error!!!")
+			panic(rollbackError)
+		}
 
 		db.Unscoped().Delete(&migration)
 	}
