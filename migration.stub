@@ -1,7 +1,7 @@
 package main
 
-func {UpFunctionName}() {
+func {UpFunctionName}() error {
 }
 
-func {DownFunctionName}() {
+func {DownFunctionName}() error {
 }
